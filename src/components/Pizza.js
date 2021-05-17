@@ -1,11 +1,24 @@
 
 export default function Pizza(props) {
 
-    const {change, state, disabler} = props
+    const {change, state, disabler, error, submit, order} = props
+
+    const errorRenderer = error.map((cb, index) => {
+        return <span key={index} >{cb}</span>
+    })
+
+    const orderRenderer = Object.entries(order).map((cb, index) => {
+        return (
+            <div key={order.id + ' ' + index} >
+                <span>{`${cb[0]}: `}</span>
+                <span>{`${cb[1]},`}</span>
+            </div>
+        )
+    })
 
     return (
         <>
-            <form id='pizza-form' >
+            <form id='pizza-form' onSubmit={submit} >
                 <label>
                     Name for Order
                     <input name='name' type='text' id='name-input' onChange={change} value={state.name} />
@@ -40,6 +53,8 @@ export default function Pizza(props) {
                 </label>
                 <button id='order-button' disabled={disabler} >Submit your Order</button>
             </form>
+        {errorRenderer}
+        {orderRenderer}
         </>
     )
 

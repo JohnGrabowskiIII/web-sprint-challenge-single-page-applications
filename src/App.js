@@ -1,5 +1,7 @@
 import React, {useState, useEffect} from "react";
 import * as yup from 'yup'
+import {BrowserRouter as Router, Route, Link, Switch} from 'react-router-dom'
+import axios from 'axios';
 
 import Pizza from './components/Pizza';
 
@@ -7,7 +9,7 @@ const App = () => {
 
   const initialPizzaFormValue = {
     name: '',
-    size: '',
+    size: 'small',
     pepperoni: false,
     sausage: false,
     spinach: false,
@@ -16,8 +18,8 @@ const App = () => {
   }
 
   const [pizzaFormValue, setPizzaFormValue] = useState(initialPizzaFormValue);
-  const [pizzaError, setPizzaError] = useState('')
-  const [databaseReturnValue, setDatabaseReturnValue] = useState([]);
+  const [pizzaError, setPizzaError] = useState([])
+  const [order, setOrder] = useState([]);
   const [buttonDisabled, setButtonDisabled] = useState(true);
 
     // YUP SCHEMA
@@ -25,7 +27,13 @@ const App = () => {
       name: yup
         .string()
         .required("name must be at least 2 characters")
-        .min(2, "name must be at least 2 characters")
+        .min(2, "name must be at least 2 characters"),
+      size: yup.string().notRequired(),
+      pepperoni: yup.boolean().notRequired(),
+      sausage: yup.boolean().notRequired(),
+      spinach: yup.boolean().notRequired(),
+      onion:  yup.boolean().notRequired(),
+      special: yup.string().notRequired()
     })
 
     // USE EFFECT TO DISABLE BUTTON
@@ -36,35 +44,50 @@ const App = () => {
         })
     }, [pizzaFormValue]);
 
-    // YUP FORM ERROR CREATOR
-    // VALIDATION FOR NAME READS "name must be at least 2 characters"
-
     // FORM CHANGE HANDLER
     const formChangeHandler = e => {
+      const {name, value} = e.target;
       e.target.type === 'checkbox' ?
-      setPizzaFormValue({...pizzaFormValue, [e.target.name]: !pizzaFormValue[e.target.name]}) :
-      setPizzaFormValue({...pizzaFormValue, [e.target.name]: e.target.value});
+      setPizzaFormValue({...pizzaFormValue, [name]: !pizzaFormValue[name]}) :
+      setPizzaFormValue({...pizzaFormValue, [name]: value});
+      yup.reach(formSchema, name)
+      .validate(value)
+      .then(valid => {
+        setPizzaError([])
+      })
+      .catch(err => {
+        setPizzaError(err.errors);
+      })
     }
-
-    // DEBUG USE EFFECT FOR PIZZA FORM
-    useEffect(() => {
-      console.log(pizzaFormValue)
-    }, [pizzaFormValue]);
 
     // FORM SUBMIT
     // AXIOS CALL HERE
+    const submitOrder = e => {
+      e.preventDefault();
+      axios.post('https://reqres.in/api/orders', pizzaFormValue)
+        .then(post => {
+          console.log(post.data)
+          setOrder(post.data);
+        })
+        .catch(err => {
+          console.log(err);
+        })
+    }
 
 
   return (
     <>
       <h1>Lambda Eats</h1>
-      <Pizza change={formChangeHandler} state={pizzaFormValue} disabler={buttonDisabled} />
-      
-    {/* ROUTE HERE */}
-    {/* ROUTE FOR HOME */}
-    {/* ROUTE FOR /PIZZA FORM */}
-    {/* LINK FOR /PIZZA FORM MUST HAVE ORDER-PIZZA ID */}
-    
+      <Router>
+        <Link to='/'>Home</Link>
+        <Link to='/pizza' id='order-pizza' >Order Now!</Link>
+        <Switch>
+          <Route exact path='/' />
+          <Route path='/pizza'>
+            <Pizza change={formChangeHandler} state={pizzaFormValue} disabler={buttonDisabled} error={pizzaError} submit={submitOrder} order={order} />
+          </Route>
+        </Switch>
+      </Router>
 
     </>
   );
