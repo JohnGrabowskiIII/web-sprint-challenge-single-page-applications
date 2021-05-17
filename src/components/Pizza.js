@@ -1,46 +1,44 @@
 
 export default function Pizza(props) {
 
-
+    const {change, state, disabler} = props
 
     return (
         <>
-            <h1>pizza loaded</h1>
-            {/* PIZZA SIZE IS DROPDOWN MENU */}
             <form id='pizza-form' >
                 <label>
                     Name for Order
-                    <input type='text' id='name-input' />
+                    <input name='name' type='text' id='name-input' onChange={change} value={state.name} />
                 </label>
                 <label>
                     Size
-                    <select>
-                        <option selected value='small' >Small</option>
+                    <select name='size' id='size-dropdown' onChange={change} value={state.size} >
+                        <option value='small' >Small</option>
                         <option value='medium' >Medium</option>
                         <option value='large' >Large</option>
                     </select>
                 </label>
                 <label>
                     Pepperoni
-                    <input type='checkbox' />
+                    <input name='pepperoni' type='checkbox' onChange={change} value={state.pepperoni} />
                 </label>
                 <label>
                     Sausage
-                    <input type='checkbox' />
+                    <input name='sausage' type='checkbox' onChange={change} value={state.sausage} />
                 </label>
                 <label>
                     Spinach
-                    <input type='checkbox' />
+                    <input name='spinach' type='checkbox' onChange={change} value={state.spinach} />
                 </label>
                 <label>
                     Onion
-                    <input type='checkbox' />
+                    <input name='onion' type='checkbox' onChange={change} value={state.onion} />
                 </label>
                 <label>
                     Special Request
-                    <input type='text' id='special-text' />
+                    <input name='special' type='text' id='special-text' onChange={change} value={state.special} />
                 </label>
-                <button id='order-button' >Submit your Order</button>
+                <button id='order-button' disabled={disabler} >Submit your Order</button>
             </form>
         </>
     )
